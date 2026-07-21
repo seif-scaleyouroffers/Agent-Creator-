@@ -1,0 +1,44 @@
+# Example agent: reads rows from a Google Sheet, has Claude analyze them,
+# then writes the analysis back to a different tab in the same sheet.
+#
+# Fill in `spreadsheetId` below with your own sheet's ID (the long string in
+# its URL between /d/ and /edit), and make sure:
+#   1. The sheet has a tab named "Sheet1" with some sample rows in A2:D
+#      (e.g. columns: name, deal size, status, notes).
+#   2. The sheet has a second, empty tab named "Results".
+#   3. You've shared the sheet with your service account's email
+#      (see .env.example) with "Editor" access.
+
+name: sheet-analysis-demo
+model: claude-sonnet-5
+start: read_rows
+
+steps:
+  - id: read_rows
+    tool: google_sheets_read
+    tool_params:
+      spreadsheetId: "YOUR_SPREADSHEET_ID_HERE"
+      range: "Sheet1!A2:D"
+    prompt: "Fetch the raw rows from the sheet."
+    next: analyze
+
+  - id: analyze
+    prompt: >
+      Here are rows from a spreadsheet (as JSON): {{read_rows.output}}
+
+      Summarize the key patterns across these rows in 2-3 sentences, then
+      list each row as "name: one-line insight".
+    next: write_result
+
+  - id: write_result
+    tool: google_sheets_write
+    tool_params:
+      spreadsheetId: "YOUR_SPREADSHEET_ID_HERE"
+      range: "Results!A1"
+    prompt: >
+      Take this analysis: {{analyze.output}}
+
+      Turn it into rows to write to the sheet: the first row should be
+      the header ["Summary"], followed by one row per line of the analysis
+      (each row is a single-element array containing that line of text).
+    # no `next` — this is the last step
