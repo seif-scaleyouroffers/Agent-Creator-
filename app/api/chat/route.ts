@@ -14,9 +14,10 @@ const FINALIZE_TOOL: Anthropic.Tool = {
   input_schema: {
     type: "object",
     properties: {
-      client_name: {
+      group_name: {
         type: "string",
-        description: "Name of the client/operator this session is for.",
+        description:
+          "Name/label for the group or cohort this session is for (e.g. 'Boardroom — Thursday Group', or a topic-based label like 'Growth Operators $1M+ Cohort' if there's no fixed name).",
       },
       session_day: {
         type: "string",
@@ -26,7 +27,7 @@ const FINALIZE_TOOL: Anthropic.Tool = {
       primary_topic: {
         type: "string",
         description:
-          "The main thing this session needs to cover, in specific terms (e.g. 'client is stuck pricing a rev-share deal with a $200K/mo creator' not 'pricing').",
+          "The main thing this session needs to cover, in specific terms (e.g. 'the group is stuck on how to renegotiate rev-share deals without losing income' not 'pricing').",
       },
       context: {
         type: "string",
@@ -55,7 +56,7 @@ const FINALIZE_TOOL: Anthropic.Tool = {
       },
     },
     required: [
-      "client_name",
+      "group_name",
       "session_day",
       "primary_topic",
       "context",
@@ -68,11 +69,11 @@ const FINALIZE_TOOL: Anthropic.Tool = {
 function buildSystemPrompt() {
   return `
 You are the session-prep assistant for Patrick, founder of Scale Your Offers.
-Patrick runs live 1:1-style coaching calls with clients every Tuesday and
-Thursday. Your job in THIS conversation is to help whoever is chatting with
-you (Patrick or someone on his team) prep for an upcoming session by asking
-sharp, specific questions — the way a great chief of staff would — until you
-have enough to build a real plan.
+Patrick runs live GROUP coaching calls with his Boardroom operators every
+Tuesday and Thursday — not 1:1 sessions. Your job in THIS conversation is to
+help whoever is chatting with you (Patrick or someone on his team) prep for
+an upcoming session by asking sharp, specific questions — the way a great
+chief of staff would — until you have enough to build a real plan.
 
 Speed matters more than thoroughness here. This is Patrick's own prep tool,
 not a client-facing intake form — the person using it is busy and wants a
@@ -82,10 +83,9 @@ and mentally adjust beats a perfectly-scoped plan that took five round trips
 to get to.
 
 Rules:
-- If the very first message already gives you a topic, an audience/client,
-  and something like a goal — even loosely — call finalize_session
-  immediately. Do not ask a clarifying question just because you technically
-  could.
+- If the very first message already gives you a topic, a group/audience, and
+  something like a goal — even loosely — call finalize_session immediately.
+  Do not ask a clarifying question just because you technically could.
 - If something important is genuinely missing (e.g. you have no idea what
   the topic even is), ask ONE question that covers as much ground as
   possible at once (it's fine to ask about two related things in the same
@@ -100,7 +100,7 @@ Rules:
 - Keep your own messages short and conversational, like a sharp colleague, not
   a form. You can use Patrick's voice/energy a little here too, but this part
   of the conversation is YOU talking to Patrick's team, not Patrick talking to
-  a client — so keep it plain and efficient rather than performing the brand voice.
+  the group — so keep it plain and efficient rather than performing the brand voice.
 
 Reference context — Patrick's curriculum (use to connect the session to
 existing frameworks where relevant, don't force it):
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       reply: textBlocks.map((b) => b.text).join("\n").trim(),
       finalized: toolUse ? toolUse.input : null,
-      rawAssistantContent: response.content, // needed to keep conversation history correct
+      rawAssistantContent: response.content,
     });
   } catch (err: any) {
     console.error("chat route error:", err);
