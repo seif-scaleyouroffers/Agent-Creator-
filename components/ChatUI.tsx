@@ -8,6 +8,11 @@ interface ApiMessage {
   content: string;
 }
 
+interface DisplayMessage {
+  role: "user" | "assistant";
+  text: string;
+}
+
 interface FinalizedSession {
   group_name: string;
   session_day: string;
@@ -28,9 +33,9 @@ const GREETING =
   "Hey — who's this session for, and what's actually going on with them right now?";
 
 export default function ChatUI() {
-  const [display, setDisplay] = useState
-    { role: "user" | "assistant"; text: string }[]
-  >([{ role: "assistant", text: GREETING }]);
+  const [display, setDisplay] = useState<DisplayMessage[]>([
+    { role: "assistant", text: GREETING },
+  ]);
   const [apiHistory, setApiHistory] = useState<ApiMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
