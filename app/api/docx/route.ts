@@ -57,9 +57,9 @@ function markdownToParagraphs(markdown: string): Paragraph[] {
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan_markdown, client_name, session_day } = (await req.json()) as {
+    const { plan_markdown, group_name, session_day } = (await req.json()) as {
       plan_markdown: string;
-      client_name?: string;
+      group_name?: string;
       session_day?: string;
     };
 
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const titleLine = `Session Plan — ${client_name ?? "Client"}${
+    const titleLine = `Session Plan — ${group_name ?? "Group"}${
       session_day ? ` (${session_day})` : ""
     }`;
 
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "Content-Disposition": `attachment; filename="session-plan-${(
-          client_name ?? "client"
+          group_name ?? "group"
         )
           .toLowerCase()
           .replace(/\s+/g, "-")}.docx"`,
