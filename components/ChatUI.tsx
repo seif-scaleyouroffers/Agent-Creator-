@@ -9,7 +9,7 @@ interface ApiMessage {
 }
 
 interface FinalizedSession {
-  client_name: string;
+  group_name: string;
   session_day: string;
   primary_topic: string;
   context: string;
@@ -28,7 +28,7 @@ const GREETING =
   "Hey — who's this session for, and what's actually going on with them right now?";
 
 export default function ChatUI() {
-  const [display, setDisplay] = useState<
+  const [display, setDisplay] = useState
     { role: "user" | "assistant"; text: string }[]
   >([{ role: "assistant", text: GREETING }]);
   const [apiHistory, setApiHistory] = useState<ApiMessage[]>([]);
@@ -116,7 +116,7 @@ export default function ChatUI() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         plan_markdown: output.plan_markdown,
-        client_name: finalized.client_name,
+        group_name: finalized.group_name,
         session_day: finalized.session_day,
       }),
     });
@@ -128,7 +128,7 @@ export default function ChatUI() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `session-plan-${finalized.client_name
+    a.download = `session-plan-${finalized.group_name
       .toLowerCase()
       .replace(/\s+/g, "-")}.docx`;
     a.click();
@@ -199,7 +199,7 @@ export default function ChatUI() {
             style={{ borderColor: "var(--line)", background: "#F7F5F0" }}
           >
             <p className="text-sm" style={{ color: "var(--slate)" }}>
-              Got what I need for <strong>{finalized.client_name}</strong>'s{" "}
+              Got what I need for <strong>{finalized.group_name}</strong>'s{" "}
               {finalized.session_day} session
               {finalized.slides_needed ? " — slides included." : "."}
             </p>
