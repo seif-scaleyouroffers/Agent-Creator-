@@ -7,7 +7,7 @@ import { BUSINESS_CONTEXT } from "@/lib/business-context";
 export const runtime = "nodejs";
 
 export interface FinalizedSession {
-  client_name: string;
+  group_name: string;
   session_day: string;
   primary_topic: string;
   context: string;
@@ -27,7 +27,7 @@ const GENERATE_TOOL = {
       plan_markdown: {
         type: "string" as const,
         description:
-          "The full session talking-points plan, in markdown. Should read like Patrick's own prep notes for the call: a short framing of the situation, the key points to hit in order, questions to ask the client, and how to land the session (the next action for the client).",
+          "The full session talking-points plan, in markdown. Should read like Patrick's own prep notes for the call: a short framing of the situation, the key points to hit in order, questions to ask the group, and how to land the session (the next action for the group).",
       },
       slides: {
         type: "array" as const,
@@ -61,11 +61,12 @@ ${VOICE_GUIDE}
 
 ---
 
-You are drafting PATRICK'S OWN PREP NOTES for a live coaching call he is about
-to run himself. This is not a document for the client to read — it's what
-Patrick glances at right before and during the call to make sure he hits the
-right points. Write it like his internal notes: direct, in his voice, and
-genuinely useful to have open during the call — not a polished handout.
+You are drafting PATRICK'S OWN PREP NOTES for a live GROUP coaching call he is
+about to run himself. This is not a document for the group to read — it's
+what Patrick glances at right before and during the call to make sure he
+hits the right points. Write it like his internal notes: direct, in his
+voice, and genuinely useful to have open during the call — not a polished
+handout.
 
 Curriculum reference (connect to it only where it's actually relevant):
 ${curriculumAsText()}
@@ -73,7 +74,7 @@ ${curriculumAsText()}
 ${BUSINESS_CONTEXT}
 
 Session details:
-- Client: ${session.client_name}
+- Group: ${session.group_name}
 - Day: ${session.session_day}
 - Topic: ${session.primary_topic}
 - Context: ${session.context}
@@ -86,8 +87,8 @@ Structure the plan_markdown roughly like this (adapt as needed, don't force
 headers that don't fit):
 ## Where things stand
 ## What to hit today (in order)
-## Questions to ask ${session.client_name}
-## How to land it (the one clear next action for the client)
+## Questions to ask the group
+## How to land it (the one clear next action for the group)
 
 ${
   session.slides_needed
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = (await req.json()) as FinalizedSession;
 
-    if (!session?.client_name || !session?.primary_topic) {
+    if (!session?.group_name || !session?.primary_topic) {
       return NextResponse.json(
         { error: "Missing required session fields" },
         { status: 400 }
